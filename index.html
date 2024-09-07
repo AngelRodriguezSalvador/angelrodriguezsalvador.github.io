@@ -1,16 +1,104 @@
-<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Portfolio</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Project 1 </title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        .gallery img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to My CS180 Portfolio!</h1>
-    <a href="./1/index.html">Project 1</a>
+<h1> Project 1: Colorizing early 20th century photography</h1>
+<h3> Project Overview </h3>
+<p> Sergei Mikhailovich Prokudin-Gorskii was a Russian photographer who believed
+    that color images were the future. Well ahead of his time, he envisioned a machine 
+    that would be able to render color pictures from 3 filtered black-and-white ones 
+    (one filtered red, another blue and another green). 
+</p><p>
+    For this reason, with the support of Emperor Nicholas II, he travelled all around 
+    Russia taking these sets of three images in anticipation of the future. Unfortunately, 
+    due to the Russian Revolution, and the time it took for technology to advance, he was
+    never able to see the result of his work. 
+</p><p>
+    However, since most of the pictures ended in the US Library of Congress, today we're 
+    able to revisit his work and generate color images from his work.
+</p>
+<h3> Solution Approach </h3>
+<p> Here are some examples of the images we're working with: </p>
+<section class="gallery">
+    <img src="./originals/cathedral.jpg" alt="First Image">
+    <img src="./originals/emir.jpg" alt="Second Image">
+    <img src="./originals/train.jpg" alt="Third Image">
+</section>
+
+<p> The idea of this project is that we can use each filtered version of the image 
+    as the channels R, G and B of a colored image, and thereby render a color image.
+</p><p>
+    The main challenge we need to resolve for this to work is that we must align the
+    filtered pictures with each other. In order to do this (and since we observe that 
+    no rotation is necessary) we can try different alignments and score them using L2 
+    distance between the matrix of pixel intensities. While I briefly experimented with 
+    other scoring metrics, L2 proved sufficient for our purposes. As a first approach 
+    which worked for lower resolution images, it is sufficient to brute-force search 
+    through possible alignments.  
+</p>
+<h4> Improvement 1: Pyramid Search for higher resolution images </h4>
+<p> For high resolution images, exhaustively checking photo alignments for a range of 
+    displacements isn't practical. For that reason, I implemented a pyramid search algorithm. 
+    This means that images aren't aligned directly; rather, the image is first downsized until 
+    it is small enough that we can do an exhaustive search that guarantees a correct alignment. 
+    Then, this alignment information is used to align a higher resolution of the image, and this 
+    process is repeated multiple times until we align the original picture. 
+</p> 
+<h4> Improvement 2: Cropping for better image alignment </h4>
+<p> While the process described up to this point obtained good results for some images, 
+    others has alignment problems due to the fact that borders contain unaccounted for noise. 
+    For this reason, I decided to agressively crop the images before calculating optimal aligment 
+    to avoid this noise. Specifically, I decided to use only the inner quarter of the image for aligment
+    (i.e. I cropped by 25% on each edge). Here is an example of an improvement achieved through this change:
+</p>
+<section class="gallery">
+    <img src="./bad_pics/bad_train.jpg" alt="Bad train">
+    <img src="./media_sobel/train.jpg" alt="Third Image">
+</section>
+<h4> Improvement 3: Addressing the Emir picture </h4>
+<p> The above procedure was enough to obtain good results for every image but that of the Emir of Bukhara.
+    In the case of this specific picture, the brightness value of the red-filtered image is significantly different
+    to both of the other channels. For this reason, the red filtered image was misaligned from the rest. To solve this,
+    I used a sobel filter to preprocess images to edge version of themselves. By doing this, I was able to reduce
+    the effect of the brightness difference to correctly align the emir picture. I also applied it to the rest by it
+    didn't significantly improve my results. Here's the improvement achieved on the Emir of Bukhara.
+</p>
+<section class="gallery">
+    <img src="./bad_pics/bad_emir.jpg" alt="Bad train">
+    <img src="./media_sobel/emir.jpg" alt="Third Image">
+</section>
+<h3> Results </h3>
+<p> Here are the results I obtained for the full set of provided images:</p>
+<div class="gallery">
+    <img src="./media_sobel/cathedral.jpg" alt="Photo 1">
+    <img src="./media_sobel/church.jpg" alt="Photo 2">
+    <img src="./media_sobel/emir.jpg" alt="Photo 3">
+    <img src="./media_sobel/harvesters.jpg" alt="Photo 4">
+    <img src="./media_sobel/icon.jpg" alt="Photo 5">
+    <img src="./media_sobel/lady.jpg" alt="Photo 6">
+    <img src="./media_sobel/melons.jpg" alt="Photo 7">
+    <img src="./media_sobel/monastery.jpg" alt="Photo 8">
+    <img src="./media_sobel/onion_church.jpg" alt="Photo 9">
+    <img src="./media_sobel/sculpture.jpg" alt="Photo 10">
+    <img src="./media_sobel/self_portrait.jpg" alt="Photo 11">
+    <img src="./media_sobel/three_generations.jpg" alt="Photo 12">
+    <img src="./media_sobel/tobolsk.jpg" alt="Photo 13">
+    <img src="./media_sobel/train.jpg" alt="Photo 14">
+</div>
 </body>
 </html>
