@@ -1,0 +1,126 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Project 1 </title>
+    <style>
+        .image-row {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 20px;
+        }
+        .image-container {
+            text-align: center;
+            margin: 20px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        .caption {
+            font-size: 18px;
+            color: #555;
+            margin-top: 10px;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        .gallery img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+<h1> Project 2: Fun with filters and frequencies</h1>
+<h2> Part 1: Fun with Filters</h2>
+<h3> 1.1: Finite difference operator </h3>
+<p> In this section, we use the finite difference operators to obtain the partial derivatives 
+    of an image with respect to the x and y directions. To do this, we convolve the image with 
+    the vector [1 -1] (for dx) and [1 1].T (for dy). Here are the results: 
+</p>
+<div class="image-container">
+    <img src="cameraman.jpg" alt="Original cameraman image">
+    <div class="caption">Original cameraman image</div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="part1results1/cameraman_dx.jpg" alt="Cameraman D_x">
+        <div class="caption">Cameraman D_x</div>
+    </div>
+
+    <div class="image-container">
+        <img src="part1results1/cameraman_dy.jpg" alt="Cameraman D_y">
+        <div class="caption">Cameraman D_y</div>
+    </div>
+</div>
+<p> 
+    As part of this section, I also computed the gradient magnitude image and binarized to create an edge image. 
+    The gradient magintude image like the gradient of any other 2-dimensional function f(x,y). 
+    That is, grad = sqrt((dI/dx)^2+(dI/dy)^2). To create the gradient image, we simply calculate 
+    this value at each point of the original image. An inperfection of the binarized image is that it's very noisy
+    because we had to pick a large threshold. We'll solve this in the following section.
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="part1results1/cameraman_grad.jpg" alt="Gradient image">
+        <div class="caption">Gradient image</div>
+    </div>
+
+    <div class="image-container">
+        <img src="part1results1/cameraman_binary.jpg" alt="Edge image">
+        <div class="caption">Edge image</div>
+    </div>
+</div>
+<h3> 1.2: Derivative of Gaussian (DoG) filter </h3>
+<p> Since the above image was very noisy, we will apply a gaussian filter before calculating 
+    the gradient image. That is, we first blur the image and then compute gradient magnitude:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="part1results2/cameraman_blur.jpg" alt="Gradient image">
+        <div class="caption">Blurred cameraman image</div>
+    </div>
+    <div class="image-container">
+        <img src="part1results2/cameraman_blur_grad.jpg" alt="Edge image">
+        <div class="caption">Blurred image gradient magnitude</div>
+    </div>
+    <div class="image-container">
+        <img src="part1results2/cameraman_blur_grad_binary.jpg" alt="Edge image">
+        <div class="caption">Blurred image edge image</div>
+    </div>
+</div>
+<p> 
+    In the case of the new edge image, we can see that it's significantly less noisy, 
+    because we were able to choose a much lower binary threshold (namely, I picked .08 instead of 0.3).
+    Given that we blurred the image first, random noise won't make this threshold, leading to better results.
+</p><p>
+    As prompted, I also carried out this procedure by calculating first the DoG filters (for x and y),
+    and applying those analogously to part a. Indeed, we obtain the same result:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="part1results2/gauss_x.png" alt="Gradient image">
+        <div class="caption">DoG_x</div>
+    </div>
+    <div class="image-container">
+        <img src="part1results2/gauss_y.png" alt="Edge image">
+        <div class="caption">DoG_y</div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="part1results2/cameraman_blur_grad_binary.jpg" alt="Gradient image">
+        <div class="caption">Blurred image edge image</div>
+    </div>
+    <div class="image-container">
+        <img src="part1results2/cameraman_grad_blur_binary.jpg" alt="Edge image">
+        <div class="caption">Regular image with DoG</div>
+    </div>
+</div>
+</body>
