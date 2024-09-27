@@ -278,7 +278,23 @@ the derek nutmeg example:
         <div class="caption">Result image</div>
     </div>
 </div>
-<p> Here is an example that didn't work: </p>
+<p> Here is an example that didn't work: I tried to join Barney Stinson and Joey Tribbiani's faces into one but couldn't. 
+    Due to the relative size of their faces and the specific picture I chose, only Joey is visible at any distance:
+</p>
+<div class="image-row">
+    <div class="image-container">
+      <img src="aligned_images/align_joey.jpg" alt="Original">
+      <div class="caption">Happy Tom Cruise</div>
+    </div>
+    <div class="image-container">
+      <img src="aligned_images/align_barney.jpg" alt="Forest">
+      <div class="caption">Serious Tom Cruise</div>
+    </div>
+    <div class="image-container">
+      <img src="part2results2/joey_stinson_bw.jpg" alt="Mountains">
+      <div class="caption">Mysterious Tom</div>
+    </div>
+</div>
 <h3> 2.3: Gaussian and Laplacian Stacks </h3>
 <p> 
     A gaussian stack is an image to which we apply a gaussian 
@@ -450,15 +466,15 @@ the derek nutmeg example:
 <div class="image-row">
     <div class="image-container">
         <img src="part2results4/apple_left_level2.jpg" alt="Forest">
-        <div class="caption"> Apple Laplacian L_0 (masked) </div>
+        <div class="caption"> Apple Laplacian L_2 (masked) </div>
       </div>
     <div class="image-container">
       <img src="part2results4/apple_mask_level2.jpg" alt="Original">
-      <div class="caption"> Mask Laplacian L_0 </div>
+      <div class="caption"> Mask Laplacian L_2 </div>
     </div>
     <div class="image-container">
         <img src="part2results4/apple_right_level2.jpg" alt="Forest">
-        <div class="caption">Orange Laplacian L_0 (masked)</div>
+        <div class="caption">Orange Laplacian L_2 (masked)</div>
     </div>
     <div class="image-container">
         <img src="part2results4/apple_total_level2.jpg" alt="Forest">
@@ -472,14 +488,14 @@ the derek nutmeg example:
       </div>
     <div class="image-container">
       <img src="part2results4/apple_mask_gauss.jpg" alt="Original">
-      <div class="caption"> Mask Laplacian L_0 </div>
+      <div class="caption"> Mask Gaussian last element </div>
     </div>
     <div class="image-container">
         <img src="part2results4/apple_right_gauss.jpg" alt="Forest">
-        <div class="caption">Orange Laplacian L_0 (masked)</div>
+        <div class="caption"> Orange Gaussian last element (masked) </div>
     </div>
     <div class="image-container">
-        <img src="part2results4/apple_total_gauss.jpg" alt="Forest">
+        <img src="part2results4/apple_total_gauss_.jpg" alt="Forest">
         <div class="caption">Resulting Image at this level</div>
     </div>
 </div>
@@ -497,6 +513,94 @@ the derek nutmeg example:
         <div class="caption"> Final result</div>
     </div>
 </div>
+<p> For my own images with a regular mask, I picked to blend landscapes: </p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="part2results4/landscape_left_level0.jpg" alt="Forest">
+        <div class="caption"> City Laplacian L_0 (masked) </div>
+      </div>
+    <div class="image-container">
+      <img src="part2results4/landscape_mask_level0.jpg" alt="Original">
+      <div class="caption"> Mask Laplacian L_0 </div>
+    </div>
+    <div class="image-container">
+        <img src="part2results4/landscape_right_level0.jpg" alt="Forest">
+        <div class="caption">Forest Laplacian L_0 (masked)</div>
+    </div>
+    <div class="image-container">
+        <img src="part2results4/landscape_total_level0.jpg" alt="Forest">
+        <div class="caption">Resulting Image at this level</div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="part2results4/landscape_left_level1.jpg" alt="Forest">
+        <div class="caption"> City Laplacian L_1 (masked) </div>
+      </div>
+    <div class="image-container">
+      <img src="part2results4/landscape_mask_level1.jpg" alt="Original">
+      <div class="caption"> Mask Laplacian L_1 </div>
+    </div>
+    <div class="image-container">
+        <img src="part2results4/landscape_right_level1.jpg" alt="Forest">
+        <div class="caption">Forest Laplacian L_1 (masked)</div>
+    </div>
+    <div class="image-container">
+        <img src="part2results4/landscape_total_level1.jpg" alt="Forest">
+        <div class="caption">Resulting Image at this level</div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="part2results4/landscape_left_level2.jpg" alt="Forest">
+        <div class="caption"> City Laplacian L_2 (masked) </div>
+      </div>
+    <div class="image-container">
+      <img src="part2results4/landscape_mask_level2.jpg" alt="Original">
+      <div class="caption"> Mask Laplacian L_2 </div>
+    </div>
+    <div class="image-container">
+        <img src="part2results4/landscape_right_level2.jpg" alt="Forest">
+        <div class="caption">Forest Laplacian L_2 (masked)</div>
+    </div>
+    <div class="image-container">
+        <img src="part2results4/landscape_total_level2.jpg" alt="Forest">
+        <div class="caption">Resulting Image at this level</div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="part2results4/landscape_left_gauss.jpg" alt="Forest">
+        <div class="caption"> City Gaussian Last Element (masked) </div>
+      </div>
+    <div class="image-container">
+      <img src="part2results4/landscape_mask_gauss.jpg" alt="Original">
+      <div class="caption"> Mask Gaussian last element </div>
+    </div>
+    <div class="image-container">
+        <img src="part2results4/landscape_right_gauss.jpg" alt="Forest">
+        <div class="caption"> Forest Gasussian Last Element (masked)</div>
+    </div>
+    <div class="image-container">
+        <img src="part2results4/landscape_total_gauss_.jpg" alt="Forest">
+        <div class="caption">Resulting Image at this level</div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="aligned_images/align_city.jpg" alt="Forest">
+        <div class="caption"> Original city </div>
+      </div>
+    <div class="image-container">
+      <img src="aligned_images/align_forest.jpg" alt="Original">
+      <div class="caption"> Original Orange </div>
+    </div>
+    <div class="image-container">
+        <img src="part2results4/landscape.jpg" alt="Forest">
+        <div class="caption"> Final result</div>
+    </div>
+</div>
+
 <p> For the irregular mask example, I chose to put squidward's house in space:</p>
 <div class="image-row">
     <div class="image-container">
@@ -545,10 +649,28 @@ the derek nutmeg example:
     </div>
     <div class="image-container">
         <img src="part2results4/squid_right_level2.jpg" alt="Forest">
-        <div class="caption">Space Laplacian L_0 (masked)</div>
+        <div class="caption">Space Laplacian L_2 (masked)</div>
     </div>
     <div class="image-container">
         <img src="part2results4/squid_total_level2.jpg" alt="Forest">
+        <div class="caption">Resulting Image at this level</div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="part2results4/squid_left_gauss.jpg" alt="Forest">
+        <div class="caption"> Squidhouse Last Element (masked) </div>
+      </div>
+    <div class="image-container">
+      <img src="part2results4/squid_mask_gauss.jpg" alt="Original">
+      <div class="caption"> Mask Gaussian last element </div>
+    </div>
+    <div class="image-container">
+        <img src="part2results4/squid_right_gauss.jpg" alt="Forest">
+        <div class="caption"> Space Gasussian Last Element (masked)</div>
+    </div>
+    <div class="image-container">
+        <img src="part2results4/squid_total_gauss_.jpg" alt="Forest">
         <div class="caption">Resulting Image at this level</div>
     </div>
 </div>
@@ -559,11 +681,11 @@ the derek nutmeg example:
       </div>
     <div class="image-container">
       <img src="aligned_images/align_outer_space.jpg" alt="Original">
-      <div class="caption"> Mask Laplacian L_0 </div>
+      <div class="caption"> Original Space Image </div>
     </div>
     <div class="image-container">
         <img src="part2results4/space_squid.jpg" alt="Forest">
-        <div class="caption">Orange Laplacian L_0 (masked)</div>
+        <div class="caption">Final result</div>
     </div>
 </div>
 </body>
