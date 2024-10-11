@@ -1,0 +1,243 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Project 3 </title>
+    <style>
+        .image-row {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 20px;
+        }
+        .image-container {
+            text-align: center;
+            margin: 20px;
+            width: 25%;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        .caption {
+            font-size: 18px;
+            color: #555;
+            margin-top: 10px;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        .gallery img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+<h1> Project 3: Face Morphing </h1>
+<h2> Part 1: Defining Correspondances </h2>
+<p>
+    For this part, I used the provided tool from last year to define correspondence points
+    in both images. Then I used Delaunay to create appropriate triangulations. 
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/angel_points.png" alt="Original cameraman image">
+        <div class="caption"> Correspondences for my image </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/george_points.png" alt="Cameraman D_x">
+        <div class="caption">Correspondences for the George Clooney Image</div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/angel_overlay.png" alt="Original cameraman image">
+        <div class="caption">My delaunay triangulation overlayed on the orignial image</div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/george_overlay.png" alt="Cameraman D_x">
+        <div class="caption">George's triangulation over his image</div>
+    </div>
+</div>
+<h2> Part 2: Computing the "Mid-Way" face </h2>
+<p> 
+    This was in my option the most challenging section of the project. As described in
+    the problem statement, we must first warp both faces to the average shape and then 
+    averaging the colors together. However, looking forward to section 3, this is just
+    a particular example of the morph function, with both coefficients = 0.5. 
+</p><p>
+    To do this, we iterate through each of the triangles in our Delaunay triangulation.
+    In each iteration, we must calculate the values of the pixels of the destination from 
+    the source triangle. By solving a linear system, we find the affine matrix that describes 
+    the transformation from one triangle to the other. Then, we map the pixel values using
+    bilinear interpolation.
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/align_angel.jpg" alt="Original cameraman image">
+        <div class="caption"> My Original image </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/align_george.jpg" alt="Cameraman D_x">
+        <div class="caption"> George Clooney's original image </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/midway_face.jpg" alt="Original cameraman image">
+        <div class="caption">The midway face</div>
+    </div>
+</div>
+<h3> Part 3: The Morph Sequence </h3>
+<p> 
+    The next part is based around the objective of creating a smooth transition
+    from one image to another. To do this, we use a very similar approach to that of 
+    part 2. Now however, we use the parameters warp_frac and dissolve_frac to accomplish 
+    images which are closer to one image than the other. By making both parameters increase 
+    slowly, we achieve the desired smooth transitiion. 
+</p>
+<div class="image-container">
+    <img src="result_images/morph.gif" alt="Cameraman D_x">
+    <div class="caption"> George Clooney's original image </div>
+</div>
+<h3> Part 4: The Mean Face of a population </h3>
+<p>
+    In the following section, we explore how to create the average face of a population, 
+    and then morph using that face. For this part I used the FEI face database provided in
+    the project assignment. 
+
+    To do this, we first established the average correspondence points of the dataset and Delaunay
+    triangulation. Then we reuse code from part 2 to morph each face into the average shape.
+    Finally, we average the morphed images to obtained the desired average face. Note that for better
+    results I added correspondence points in the corners for all images.
+ </p>
+ <div class="image-container">
+    <img src="result_images/mean_face.jpg" alt="Cameraman D_x">
+    <div class="caption"> Population mean face </div>
+</div>
+Then, I warped images of people in the dataset to the average face to obtain the following results:
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/1a.jpg" alt="Original cameraman image">
+        <div class="caption"> Original first image in the dataset </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/a1_to_mean.jpg" alt="Cameraman D_x">
+        <div class="caption"> First image morphed to the mean face </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/2a.jpg" alt="Original cameraman image">
+        <div class="caption"> Original second image in the dataset </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/a2_to_mean.jpg" alt="Cameraman D_x">
+        <div class="caption"> Second image morphed to the mean face </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/3a.jpg" alt="Original cameraman image">
+        <div class="caption"> Original third image in the dataset </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/a3_to_mean.jpg" alt="Cameraman D_x">
+        <div class="caption"> Third image morphed to the mean face </div>
+    </div>
+</div>
+<p>
+    In order to warp my face to the average population's, I redefined the correspondence
+    points so that they matched those of the original images. That is, the same number of points
+    in corresponding locations. Using this method, I obtained the following results:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/angel_to_mean.jpg" alt="Original cameraman image">
+        <div class="caption"> My face warped to the average populations' </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/mean_to_angel.jpg" alt="Cameraman D_x">
+        <div class="caption"> The average face warped to mine </div>
+    </div>
+</div>
+<p>
+    The reason why the face is deformed is because of inaccuracy in correspondence selection, and image cropping choice.
+</p>
+<h2> Part 5: Caricatures: Extrapolating from the mean </h2>
+<p> 
+    In this section, I create caricatures of my face by extrapolating from the population mean that 
+    I calculated in the last step. By using an extrapolation factor to alter the destination correspondaces
+    I achieve different levels of caricaturization. In one direction:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/angel_caricature0.75.jpg" alt="Original cameraman image">
+        <div class="caption"> Extrapolation_factor = 0.75 </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/angel_caricature0.5.jpg" alt="Cameraman D_x">
+        <div class="caption"> Extrapolation_factor = 0.5 </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/angel_caricature0.jpg" alt="Cameraman D_x">
+        <div class="caption"> Extrapolation_factor = 0 (same as from part 4) </div>
+    </div>
+</div>
+<p> In the other: </p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/angel_caricature1.25.jpg" alt="Original cameraman image">
+        <div class="caption"> Extrapolation_factor = 1.25 </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/angel_caricature1.5.jpg" alt="Cameraman D_x">
+        <div class="caption"> Extrapolation_factor = 1.5 </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/angel_caricature2.jpg" alt="Cameraman D_x">
+        <div class="caption"> Extrapolation_factor = 2 </div>
+    </div>
+</div>
+<p> 
+    Note that if we were to set the factor to 1, we would get the original image back. 
+</p>
+<h2>Bells and whistles: Becoming a Bollywood Actress</h2>
+<p> 
+    For my mandatory bells and whistles, I decided to morph my face into that of the average Bollywood
+    actress. The target is of different sex and race so we expect funny results. Here are the original images:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/actress.jpeg" alt="Original cameraman image">
+        <div class="caption"> Average Bollywood Actress </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/angel_250x300.jpg" alt="Cameraman D_x">
+        <div class="caption"> Me! </div>
+    </div>
+</div>
+<p> I attempted to first compute the midway shape, and then only change color and shape: </p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/angel_to_bollywood_midway.jpg" alt="Original cameraman image">
+        <div class="caption"> Midway Face </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/angel_to_bollywood_color.jpg" alt="Cameraman D_x">
+        <div class="caption"> Just Color </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/angel_to_bollywood_shape.jpg" alt="Cameraman D_x">
+        <div class="caption"> Just Shape </div>
+    </div>
+</div>
+<p> 
+    Despite the rather distrubing shape image, we can see that my lips became smaller, 
+    my eyes turned inwards and my jaw became more round. Similarly, the color-only change
+    keeps my features, but turns them into a strange female version. Spooky!
+</p>
+</body>
