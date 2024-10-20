@@ -1,0 +1,278 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Project 4 </title>
+    <script type="text/javascript" async 
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+    <style>
+        .image-row {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 20px;
+        }
+        .image-container {
+            text-align: center;
+            margin: 20px;
+            width: 25%;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        .caption {
+            font-size: 18px;
+            color: #555;
+            margin-top: 10px;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        .gallery img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+<h1> Image Warping and Mosaicing - Part A </h1>
+<h2> Shoot images and recover homographies </h2>
+<p> 
+    I used these images throughout my project:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/great_hall_1.jpg" alt="Original cameraman image">
+        <div class="caption"> Ihouse Great Hall 1 </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/great_hall_2.jpg" alt="Cameraman D_x">
+        <div class="caption">Ihouse Great Hall 2</div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/elevator_1.png" alt="Original cameraman image">
+        <div class="caption"> Ihouse Elevator 1 </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/elevator_2.png" alt="Cameraman D_x">
+        <div class="caption">Ihouse Elevator 2</div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/stairs_1.jpg" alt="Original cameraman image">
+        <div class="caption"> Ihouse Stairs 1 </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/stairs_2.jpg" alt="Cameraman D_x">
+        <div class="caption">Ihouse Stairs 2</div>
+    </div>
+</div>
+<p>
+    The first step of the project was to define correspondances 
+    between the images. To do this, I used the tool from project 3. I observed
+    that for best results, it was preferrable to have a large number of 
+    point pairs and have a signiciant overlap between images. 
+</p>
+<p>
+    Once I have defined the correspondances, the next task is to recover a transformation
+    such that:
+    \[
+    \begin{bmatrix}
+    a & b & c \\
+    d & e & f \\
+    g & h & 1
+    \end{bmatrix}
+    \begin{bmatrix}
+    x \\
+    y \\
+    1
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+    wx' \\
+    wy' \\
+    w
+    \end{bmatrix}
+    \]
+    Note that this transformation won't map points from one image to another directly, 
+    but there will also be a scaling component w which we had to account for (it took me some time
+    to realize this).
+    From here, we expand and rearrange to obtain:
+    \[
+      \begin{bmatrix}
+      x & y & 1 & 0 & 0 & 0 & -xx' & -yx' \\
+      0 & 0 & 0 & x & y & 1 & -xy' & -yy'
+      \end{bmatrix}
+      \begin{bmatrix}
+      a \\
+      b \\
+      c \\
+      d \\
+      e \\
+      f \\
+      g \\
+      h
+      \end{bmatrix}
+      =
+      \begin{bmatrix}
+      x' \\
+      y'
+      \end{bmatrix}
+      \]
+</p>
+<p>
+    Note that if we pick four points there will be an exact solution 
+    to this system. However, in practice, due innacuracy in point selection
+    it is better to select more points and then use least squares. 
+</p>
+<h2> Warp images </h2>
+<p> Once we have recovered the homography H, we can use this matrix
+    to warp one of the image (which is necessary before mosaicing). 
+    To do this, I reused some of the techniques from project 3. Specifically, 
+    the steps to warp an image are the following:
+    <ul>
+        <li>
+            First, we apply the homography to the corners of the image 
+            to establish the shape of the final warp.
+        </li>
+        <li>
+            Then, using sk.draw.polygon, we find the coordinates of the pixels
+            in this resulting shape. We can perform an inverse warp of these 
+            coordinates to recover the corresponding positions in the source image.
+        </li>
+        <li>
+            Finally, we interpolate the pixel values at this positions and fill in
+            the result. 
+        </li>
+    </ul>
+    For example, here is the first great hall image warped according to its homography with great hall 2:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/great_hall_1.jpg" alt="Original cameraman image">
+        <div class="caption"> Ihouse great hall 1 Original </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/im1warp.jpg" alt="Cameraman D_x">
+        <div class="caption">Ihouse great hall 1 warped</div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/great_hall_2.jpg" alt="Cameraman D_x">
+        <div class="caption">Ihouse Great Hall 2</div>
+    </div>
+</div>
+<p> 
+    We can get interesting results by warping images that contain rectangular objects 
+    in perspective into images that force those objects to appear rectangular. To do this,
+    we simply define a correspondace between the four corners and a rectangle of our choice:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/board.jpg" alt="Original cameraman image">
+        <div class="caption"> Board Outside my Room </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/boardwarp.jpg" alt="Cameraman D_x">
+        <div class="caption">Warped Board</div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/window.jpg" alt="Original cameraman image">
+        <div class="caption"> Book on chest </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/window_warp.jpg" alt="Cameraman D_x">
+        <div class="caption"> Warped Window</div>
+    </div>
+</div>
+<p> 
+    Note that it might seem that the shapes are still not rectangular. 
+    I believe that this is a visual effect due to the distorted perspective.
+</p>
+<h2> Mosaicing </h2>
+<p>
+    Once we have recovered the homography matrix, we may blend once image into another 
+    by superposing the aligned homography with the original destination image. To do this,
+    we start calculating the size of the final projection which is calculated from the sizes 
+    of the images and the offset between them. After building the 'canvas' where the result will
+    go, we may superimpose the images. 
+    To avoid the appearance of edges between the images, we blend them using an alpha mask
+    than decreases from 0 to 1 between images
+    We obtain the following results:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/great_hall_1.jpg" alt="Original cameraman image">
+        <div class="caption"> Leftmost image </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/great_hall_2.jpg" alt="Cameraman D_x">
+        <div class="caption"> Rightmost image </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/great_hall_final.jpg" alt="Cameraman D_x">
+        <div class="caption"> Mosaic </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/elevator_1.png" alt="Original cameraman image">
+        <div class="caption"> Leftomst Image </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/elevator_2.png" alt="Cameraman D_x">
+        <div class="caption"> Rightmost image </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/elevator_final2.jpg" alt="Cameraman D_x">
+        <div class="caption"> Mosaic </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/stairs_1.jpg" alt="Original cameraman image">
+        <div class="caption"> Mosaic </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/stairs_2.jpg" alt="Cameraman D_x">
+        <div class="caption"> Middle image </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/stairs_final.jpg" alt="Cameraman D_x">
+        <div class="caption"> Mosaic </div>
+    </div>
+</div>
+<p> 
+    Note that there is no additional difficulty to doing 3 images instead of 2.
+    We obtain the homography between 1 and 3 by multiplying those of 1 and 2 and
+    2 and 3. I made a naive (not alpha blended) 3 photo mosaic:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/great_hall_1.jpg" alt="Original cameraman image">
+        <div class="caption"> Leftmost image </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/great_hall_2.jpg" alt="Cameraman D_x">
+        <div class="caption"> Middle image </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/great_hall_3.jpg" alt="Cameraman D_x">
+        <div class="caption"> Rightmost image </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/great_hall_three.jpg" alt="Cameraman D_x">
+        <div class="caption"> Naive mosaic </div>
+    </div>
+</div>
+</body>
