@@ -38,6 +38,9 @@
             height: auto;
             object-fit: cover;
         }
+        .image-row:last-of-type .image-container {
+        width: 85%;
+    }
     </style>
 </head>
 <body>
@@ -212,20 +215,6 @@
 </p>
 <div class="image-row">
     <div class="image-container">
-        <img src="result_images/great_hall_1.jpg" alt="Original cameraman image">
-        <div class="caption"> Leftmost image </div>
-    </div>
-    <div class="image-container">
-        <img src="result_images/great_hall_2.jpg" alt="Cameraman D_x">
-        <div class="caption"> Rightmost image </div>
-    </div>
-    <div class="image-container">
-        <img src="result_images/great_hall_final.jpg" alt="Cameraman D_x">
-        <div class="caption"> Mosaic </div>
-    </div>
-</div>
-<div class="image-row">
-    <div class="image-container">
         <img src="result_images/elevator_1.png" alt="Original cameraman image">
         <div class="caption"> Leftomst Image </div>
     </div>
@@ -234,10 +223,26 @@
         <div class="caption"> Rightmost image </div>
     </div>
     <div class="image-container">
-        <img src="result_images/elevator_final2.jpg" alt="Cameraman D_x">
+        <img src="result_mosaics_a/elevator_final.jpg" alt="Cameraman D_x">
         <div class="caption"> Mosaic </div>
     </div>
 </div>
+
+Here are the alpha masks for the images above. 
+
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_mosaics_a/elevator_mask_a.jpg" alt="Original cameraman image">
+        <div class="caption"> Leftomst Image </div>
+    </div>
+    <div class="image-container">
+        <img src="result_mosaics_a/elevator_mask_b.jpg" alt="Cameraman D_x">
+        <div class="caption"> Rightmost image </div>
+    </div>
+</div>
+
+<p> And here are some other mosaics I created: </p>
+
 <div class="image-row">
     <div class="image-container">
         <img src="result_images/stairs_1.jpg" alt="Original cameraman image">
@@ -248,7 +253,21 @@
         <div class="caption"> Rightmost image </div>
     </div>
     <div class="image-container">
-        <img src="result_images/stairs_final.jpg" alt="Cameraman D_x">
+        <img src="result_mosaics_a/stairs_final.jpg" alt="Cameraman D_x">
+        <div class="caption"> Mosaic </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/great_hall_1.jpg" alt="Original cameraman image">
+        <div class="caption"> Leftmost image </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/great_hall_2.jpg" alt="Cameraman D_x">
+        <div class="caption"> Rightmost image </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/great_hall_final.jpg" alt="Cameraman D_x">
         <div class="caption"> Mosaic </div>
     </div>
 </div>
@@ -273,6 +292,163 @@
     <div class="image-container">
         <img src="result_images/great_hall_three.jpg" alt="Cameraman D_x">
         <div class="caption"> Naive mosaic </div>
+    </div>
+</div>
+<h1> Part B: Feature Matching for Autostitching </h1>
+<h2> Harris </h2>
+<p>
+    The goal of this section is to eliminate the need for manual correspondance 
+    selection. The first step towards achieving this is through corner detection,
+    for which we use the provided harris starter code. 
+
+    Specifically, what the harris algorithm does is calculate a sum of the gradients
+    around an image location and compute its eignevalues. If the matrix indicates sufficient
+    convexity (above a threshold), we'll consider it a corner. 
+
+    In the provided implementation, the threshold is set to a very low value that identifies
+    a lot of potential corners, but to speed up computation and obtain better results 
+    I decided to set the threshold a bit higher from the get-go. This is an 
+    example output from the harris corner detector:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="resultsb_diwali/no_thres.jpg" alt="Cameraman D_x">
+        <div class="caption"> Naive Harris results </div>
+    </div>
+    <div class="image-container">
+        <img src="resultsb_diwali/lower_corner_thres.jpg" alt="Original cameraman image">
+        <div class="caption"> Lower threshold for a point </div>
+    </div>
+    <div class="image-container">
+        <img src="resultsb_diwali/higher_corner_thres.jpg" alt="Cameraman D_x">
+        <div class="caption"> Higher threshold for a point </div>
+    </div>
+</div>
+<h2> Adaptive non-maximal supression </h2>
+<p>
+    The problem with thresholding directly on the harris value is that we may end up with 
+    many points on one section of an image and fewer on a another, yielding suboptimal results.
+    For this reason, we find points that are locally relevant (as opposed to globally significant). 
+    I did this by finding the distance from each point to another of greater activation. Then, 
+    I kept the k points for which this metric was higher. We should end up with an even spread of corners
+    throughout the image. Here is a nice example:
+</p>
+<div class="image-row">
+    <img src="resultsb_ihousepatio/im2selpts.jpg" alt="Original cameraman image">
+    <div class="caption"> Patio Image ANMS </div>
+</div>
+<h2> Feature extraction and matching </h2>
+<p>
+    From the paper, we take the idea to compare downscaled large samples of images around selected corner points 
+    rather than naively comparing small patches around the point. This makes the process more stable to slight 
+    angle changes between pictures, or similar small errors like that. Also, to avoid aliasing, we first blur the image
+    before extracting features. 
+</p><p>
+    Once the features have been extracted, we may compare them to each other. In this case, we apply a simple L2 norm
+    between features to evaluate the likelihood of those two features corresponding to the same image location. Then,
+    I applied Lowe's trick to make outliers less likely (if the first match option is significantly better than the 
+    second, then it is likely correct). 
+</p>
+<p> 
+    Another feature I implemented is checking for matches in both directions, and applying Lowe's trick both ways. 
+    That is to say, if (p1, p2) are to be considered a pair, p1 must be significantly better match than any other for 
+    p2 and p2 must be so for p1. I found that, in practice, this almost eliminates outliers completely (I haven't seen 
+    any in the images I've tried), thereby eliminating the need for RANSAC. Still, I implemented ransac since its required 
+    (more on that later). Here is an example of successful matches between two images:
+</p>
+<div class="image-row">
+    <img src="resultsb_elevator/visualmatches.jpg" alt="Original cameraman image">
+    <div class="caption"> Example Automatching </div>
+</div>
+<h2> RANSAC </h2>
+<p>
+    The final step of the process is to apply RANSAC for robust homography estimation.
+    The goal of RANSAC is to make our homography algorithm robust to outliers which were 
+    misidentified in the steps above. 
+</p>
+<p> RANSAC works in the following way: 
+    <ul>
+        <li>
+            First, we choose four random points and calculate estimate the homography based
+            off those. 
+        </li>
+        <li>
+            Using this homography, determine how many points have been assigned to their correct
+            location (within a margin of error). These points are called inliners.
+        </li>
+        <li>
+           Repeat the steps above with different samples of 4 points until the best 
+           homography - that with the most inliners in achieved. 
+        </li>
+        <li>
+            Calculate the best homography by performing least squares on this largest possible
+            set of inliners. 
+         </li>
+    </ul>
+    By doing this I achieved the following results:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_images/elevator_1.png" alt="Original cameraman image">
+        <div class="caption"> Ihouse Elevator 1 </div>
+    </div>
+    <div class="image-container">
+        <img src="result_images/elevator_2.png" alt="Cameraman D_x">
+        <div class="caption">Ihouse Elevator 2</div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="result_mosaics_a/elevator_final.jpg" alt="Cameraman D_x">
+        <div class="caption"> Manually selected points mosaic </div>
+    </div>
+    <div class="image-container">
+        <img src="resultsb_elevator/final_mosaic.jpg" alt="Cameraman D_x">
+        <div class="caption"> Autostitching mosaic </div>
+    </div>
+</div>
+<p> 
+    As desired these images are almost identical. For my other examples, 
+    I chose different images from section A since I believe I found nicer pictures 
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="photos/patio_1.jpeg" alt="Original cameraman image">
+        <div class="caption"> Ihouse Patio 1 </div>
+    </div>
+    <div class="image-container">
+        <img src="photos/patio_2.jpeg" alt="Cameraman D_x">
+        <div class="caption"> Ihouse Patio 2</div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="resultsb_ihousepatio/manual_mosaic.jpg" alt="Original cameraman image">
+        <div class="caption"> Patio mosaic - manual </div>
+    </div>
+    <div class="image-container">
+        <img src="resultsb_ihousepatio/final_mosaic.jpg" alt="Cameraman D_x">
+        <div class="caption"> Patio mosaic - autogen </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="photos/diwali_1.jpeg" alt="Original cameraman image">
+        <div class="caption"> Diwali ground 1 </div>
+    </div>
+    <div class="image-container">
+        <img src="photos/diwali_2.jpeg" alt="Cameraman D_x">
+        <div class="caption"> Diwali Ground 2 </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="resultsb_diwali/manual_mosaic.jpg" alt="Original cameraman image">
+        <div class="caption"> Diwali Manual mosaic </div>
+    </div>
+    <div class="image-container">
+        <img src="resultsb_diwali/final_mosaic.jpg" alt="Cameraman D_x">
+        <div class="caption"> Diwali mosaic - autogen </div>
     </div>
 </div>
 </body>
