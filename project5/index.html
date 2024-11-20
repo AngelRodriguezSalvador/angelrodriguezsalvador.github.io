@@ -1,0 +1,612 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Project 5 </title>
+    <script type="text/javascript" async 
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+    <style>
+        .image-row {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 20px;
+        }
+        .image-container {
+            text-align: center;
+            margin: 20px;
+            width: 25%;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        .caption {
+            font-size: 18px;
+            color: #555;
+            margin-top: 10px;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        .gallery img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+        .image-row:last-of-type .image-container {
+        width: 85%;
+    }
+    </style>
+</head>
+<body>
+<h1> Part 0 - Setup </h1>
+<p>
+    To start off, I used the DeepFloyd model to generate images. Here, and in all steps of the project, 
+    I used 2024 as a seed. Here are images I attained with 20 inference steps:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/initial_pencil.png" alt="Original cameraman image">
+        <div class="caption"> Pencil at 20 inference steps </div>
+    </div>
+    <div class="image-container">
+        <img src="images/initial_barista.png" alt="Cameraman D_x">
+        <div class="caption"> Barista at 20 inference steps </div>
+    </div>
+    <div class="image-container">
+        <img src="images/initial_waterfall.png" alt="Cameraman D_x">
+        <div class="caption"> Waterfall at 20 inference steps </div>
+    </div>
+</div>
+<p> 
+    When inference steps are reduced, image quality also decreases significantly. Here are
+    the same images with significantly fewer inference steps:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/pencil_fewer_steps.png" alt="Original cameraman image">
+        <div class="caption"> Pencil at 5 inference steps </div>
+    </div>
+    <div class="image-container">
+        <img src="images/barista_fewer_steps.png" alt="Cameraman D_x">
+        <div class="caption"> Barista at 5 inference steps </div>
+    </div>
+    <div class="image-container">
+        <img src="images/waterfalls_fewer_steps.png" alt="Cameraman D_x">
+        <div class="caption"> Waterfall at 5 inference steps </div>
+    </div>
+</div>
+<p> 
+    As expected, both the quality of the image and the quality of the upscale are significantly worse.
+</p>
+<h1> Part 1 - Sampling loops </h1>
+<h2> 1.1 Implementing the forward process </h2>
+<p> 
+    An important part of the diffusion process is the forward process, which takes in an image
+    and outputs a noisy version of the same image. The algorithm we used allows for images that are 
+    increasingly noisy according to the following formula:
+</p>
+<p>
+    \[
+    q(x_t | x_0) = N(x_t; \sqrt{\bar{\alpha}_t} x_0, (1 - \bar{\alpha}_t) I)
+    \]
+</p>
+<p>
+    which is equivalent to computing
+</p>
+<p>
+    \[
+    x_t = \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1 - \bar{\alpha}_t} \epsilon
+    \quad \text{where } \epsilon \sim N(0, 1)
+    \]
+</p>
+<p> After I implemented this forward algorithm it produced the following results: </p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/original_campanille_.png" alt="Original cameraman image">
+        <div class="caption"> Original Campanille Image </div>
+    </div>
+    <div class="image-container">
+        <img src="images/noisy_campanille_250_.png" alt="Cameraman D_x">
+        <div class="caption"> Noisy Campanille for Timestep t=250 </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/noisy_campanille_500_.png" alt="Original cameraman image">
+        <div class="caption"> Noisy Campanille for Timestep t=500 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/noisy_campanille_750_.png" alt="Cameraman D_x">
+        <div class="caption"> Noisy Campanille for Timestep t=750 </div>
+    </div>
+</div>
+<h2> 1.2 Classical Denoising </h2>
+<p> 
+    Classical denoising can be achieved by applying a gassian blur to noisy images.
+    The goal of this is that if noise is high frequecny, we may denoise an image by
+    limiting it to the lower frequncy. However, in this case results are quite bad.
+    Here we can see the results of classical denoising:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/noisy_campanille_250_.png" alt="Original cameraman image">
+        <div class="caption"> Noisy Campanille for Timestep t=250 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/noisy_campanille_500_.png" alt="Original cameraman image">
+        <div class="caption"> Noisy Campanille for Timestep t=500 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/noisy_campanille_750_.png" alt="Cameraman D_x">
+        <div class="caption"> Noisy Campanille for Timestep t=750 </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/gauss_denoise_250.png" alt="Original cameraman image">
+        <div class="caption"> Gauss deblur campanille for Timestep t=250 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/gauss_denoise_500.png" alt="Original cameraman image">
+        <div class="caption"> Gauss deblur campanille for Timestep t=500 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/gauss_denoise_750.png" alt="Cameraman D_x">
+        <div class="caption"> Gauss deblur campanille for Timestep t=750 </div>
+    </div>
+</div>
+<h2> 1.3 One-step denoising </h2>
+<p>
+    At this step, we will try to denoise images by using UNET. Our goal as of this 
+    subsection is to input a noisy image, and directly (not iteratively) return the 
+    model's best estimate for the denoised image. At this step, we provide no text 
+    guidance for the denoising other than the prompt 'a high quality photo'.
+</p>
+<p> 
+    In this, and subsequent steps of the project, we observe that when denoising a
+    very noisy image, the result may be high quality but different to the input. This is
+    expected given that the model has to hallucinate, and will allow image generation in later 
+    sections.
+</p>
+<p> 
+    Here are my results for one step denoising of the campanille image: 
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/noisy_campanille_250_.png" alt="Original cameraman image">
+        <div class="caption"> Noisy Campanille for Timestep t=250 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/noisy_campanille_500_.png" alt="Original cameraman image">
+        <div class="caption"> Noisy Campanille for Timestep t=500 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/noisy_campanille_750_.png" alt="Cameraman D_x">
+        <div class="caption"> Noisy Campanille for Timestep t=750 </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/one_step_denoised_250.png" alt="Original cameraman image">
+        <div class="caption"> One-step denoised campanille for Timestep t=250 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/one_step_denoised_500.png" alt="Original cameraman image">
+        <div class="caption"> One-step denoised campanille for Timestep t=500 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/one_step_denoised_750.png" alt="Cameraman D_x">
+        <div class="caption"> One-step denoised campanille for Timestep t=750 </div>
+    </div>
+</div>
+<h2> 1.4 Iterative denoising </h2>
+<p>
+    Unet achieves significantly better results if the image is denoised iteratively, 
+    as opposed to in one step. Instead of denoising iteratively timestep by timestep, 
+    we denoise 30 timesteps at a time (out of one thosand), since performace is acceptable
+    and perfonance is significantly improved. 
+</p>
+<p>
+    The following relationship relates a noisy image at timestep t, with that at timestep t' (less than t)
+</p>
+<p>
+    \[
+    x_{t'} = \frac{\sqrt{\bar{\alpha}_{t'}} \beta_t}{1 - \bar{\alpha}_t} x_0
+    + \frac{\sqrt{\alpha_t}(1 - \bar{\alpha}_{t'})}{1 - \bar{\alpha}_t} x_t + v_\sigma
+    \]
+</p>
+<p> 
+    Here, the alphas bar are determined by the model, alpha_t is the ratio between alpha_t bar and alpha_t' bar, 
+    and beta_t is 1 minus that value.
+</p>
+<p> 
+    By using this algorithm, starting at a noisy campanille at timestep t=690, we achieve the following iterative 
+    denoising results.
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/campanille_noise_690.png" alt="Original cameraman image">
+        <div class="caption"> Blurred campanille for Timestep t=690 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/campanille_iter_denoise_540.png" alt="Original cameraman image">
+        <div class="caption"> Iteratively denoised campanille at t=540 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/campanille_iter_denoise_390.png" alt="Cameraman D_x">
+        <div class="caption"> Iteratively denoised campanille at t=390 </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/campanille_iter_denoise_240.png" alt="Original cameraman image">
+        <div class="caption"> Iteratively denoised campanille at t=240 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/campanille_iter_denoise_90.png" alt="Cameraman D_x">
+        <div class="caption"> Iteratively denoised campanille at t=90 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/campanille_iter_denoise_clean.png" alt="Original cameraman image">
+        <div class="caption"> Iteratively denoise campanille </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/campanille_one_step_denoise_690.png" alt="Original cameraman image">
+        <div class="caption"> One step denoised campanille </div>
+    </div>
+    <div class="image-container">
+        <img src="images/campanille_gauss_blur_690.png" alt="Cameraman D_x">
+        <div class="caption"> Gauss blurred t=690 campanille </div>
+    </div>
+</div>
+<h2> 1.5 Diffusion model sampling </h2>
+<p> 
+    Now, we notice that if we provide pure noise, as input to the previous
+    algorithm, it will generate random viable images (not specific since we aren't
+    providing a propmt that carries information). Here are 5 samples I generated by using this:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/bad_sample_1.png" alt="Original cameraman image">
+        <div class="caption"> Naive sample 1 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/bad_sample_2.png" alt="Cameraman D_x">
+        <div class="caption"> Naive sample 2 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/bad_sample_3.png" alt="Original cameraman image">
+        <div class="caption"> Naive sample 3 </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/bad_sample_4.png" alt="Original cameraman image">
+        <div class="caption"> Naive sample 4 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/bad_sample_5.png" alt="Cameraman D_x">
+        <div class="caption"> Naive sample 5 </div>
+    </div>
+</div>
+<h2> 1.6 Classifier Free Guidance </h2>
+<p> 
+    While the previous images where somewhat realistic, they were undeniably of low
+    quality. Here, we try to improve on that. Specifically, instead of taking the noise 
+    prediciton from the model, we estimate noise using a prompt and a null string. Then, 
+    we overweight the prompt noise using the following formula (for gamma greater than 1):
+</p>
+<p>
+    \[
+        \epsilon = \epsilon_u + \gamma (\epsilon_c - \epsilon_u)
+        \]
+</p>
+<p>
+    By using this, we may achieve higher quality images:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/CFG_sample_1.png" alt="Original cameraman image">
+        <div class="caption"> CFG sample 1 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/CFG_sample_2.png" alt="Cameraman D_x">
+        <div class="caption"> CFG sample 2 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/CFG_sample_3.png" alt="Original cameraman image">
+        <div class="caption"> CFG sample 3 </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/CFG_sample_4.png" alt="Original cameraman image">
+        <div class="caption"> CFG sample 4 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/CFG_sample_5.png" alt="Cameraman D_x">
+        <div class="caption"> CFG sample 5 </div>
+    </div>
+</div>
+<h2> 1.7 Image-to-image translation </h2>
+<p>
+    In this section, we experiment and try to obtain similar images to an input, 
+    by adding significant noise. If we add too much, the input and output will be too different.
+    If we don't add enough they'll be too similar. Here 
+</p>
+<p>
+    Here are is the original campanille image:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/original_campanille_.png" alt="Original cameraman image">
+        <div class="caption"> Original Campanille </div>
+    </div>
+</div>
+<p>
+    And here are the edited verisons:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/campanille_edit_1.png" alt="Original cameraman image">
+        <div class="caption"> Campanille Edit i=1 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/campanille_edit_2.png" alt="Cameraman D_x">
+        <div class="caption"> Campanille Edit i=3 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/campanille_edit_3.png" alt="Original cameraman image">
+        <div class="caption"> Campanille Edit i=5 </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/campanille_edit_4.png" alt="Original cameraman image">
+        <div class="caption"> Campanille Edit i=7 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/campanille_edit_5.png" alt="Cameraman D_x">
+        <div class="caption"> Campanille Edit i=10 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/campanille_edit_6.png" alt="Original cameraman image">
+        <div class="caption"> Campanille Edit i=20 </div>
+    </div>
+</div>
+<p>
+    I also edited an image of a minion toy. I believe that since its of unusal shape
+    it took longer for the image to resemble the original:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/resized_minion.jpg" alt="Original cameraman image">
+        <div class="caption"> Original Minion </div>
+    </div>
+</div>
+<p>
+    And here are the edited verisons:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/minion_edit_1.png" alt="Original cameraman image">
+        <div class="caption"> Minion Edit i=1 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/minion_edit_2.png" alt="Cameraman D_x">
+        <div class="caption"> Minion Edit i=3 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/minion_edit_3.png" alt="Original cameraman image">
+        <div class="caption"> Minion Edit i=5 </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/minion_edit_4.png" alt="Original cameraman image">
+        <div class="caption"> Minion Edit i=7 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/minion_edit_5.png" alt="Cameraman D_x">
+        <div class="caption"> Minion Edit i=10 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/minion_edit_6.png" alt="Original cameraman image">
+        <div class="caption"> Minion Edit i=20 </div>
+    </div>
+</div>
+<p>
+    Finally, I used an image of a mountain I took on vacation
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/resized_mountain.jpg" alt="Original cameraman image">
+        <div class="caption"> Original Mountain </div>
+    </div>
+</div>
+<p>
+    And here are the edited verisons:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/mountain_edit_1.png" alt="Original cameraman image">
+        <div class="caption"> Mountain Edit i=1 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/mountain_edit_2.png" alt="Cameraman D_x">
+        <div class="caption"> Mountain Edit i=3 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/mountain_edit_3.png" alt="Original cameraman image">
+        <div class="caption"> Mountain Edit i=5 </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/mountain_edit_4.png" alt="Original cameraman image">
+        <div class="caption"> Mountain Edit i=7 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/mountain_edit_5.png" alt="Cameraman D_x">
+        <div class="caption"> Mountain Edit i=10 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/mountain_edit_6.png" alt="Original cameraman image">
+        <div class="caption"> Mountain Edit i=20 </div>
+    </div>
+</div>
+<h2> 1.7.1 Hand-drawn images </h2>
+<p> 
+    A similar procedure can be applied to hand drawn/unrealistic images. 
+    Here are the results for a hand-drawn image I found online:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/ms_paint.png" alt="Original cameraman image">
+        <div class="caption"> Internet house drawing </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/paint_edit_1.png" alt="Original cameraman image">
+        <div class="caption"> Internet drawing i=1 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/paint_edit_2.png" alt="Cameraman D_x">
+        <div class="caption"> Internet drawing i=3 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/paint_edit_3.png" alt="Original cameraman image">
+        <div class="caption"> Internet drawing i=5 </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/paint_edit_4.png" alt="Original cameraman image">
+        <div class="caption"> Internet drawing i=7 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/paint_edit_5.png" alt="Cameraman D_x">
+        <div class="caption"> Internet drawing i=10 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/paint_edit_6.png" alt="Original cameraman image">
+        <div class="caption"> Internet drawing i=20 </div>
+    </div>
+</div>
+<p>
+    Then I tried to apply this to my terrible drawing skills. I achieved great results
+    with a castle drawing and worse ones with one of a mountain:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/Castle drawing.png" alt="Original cameraman image">
+        <div class="caption"> Mountain drawing </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/castle_edit_1.png" alt="Original cameraman image">
+        <div class="caption"> Castle edit i=1 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/castle_edit_2.png" alt="Cameraman D_x">
+        <div class="caption"> Castle edit i=3 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/castle_edit_3.png" alt="Original cameraman image">
+        <div class="caption"> Castle edit i=5 </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/castle_edit_4.png" alt="Original cameraman image">
+        <div class="caption"> Castle edit i=7 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/castle_edit_5.png" alt="Cameraman D_x">
+        <div class="caption"> Castle edit i=10 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/castle_edit_6.png" alt="Original cameraman image">
+        <div class="caption"> Castle edit i=20 </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/mountain_drawing_original.png" alt="Original cameraman image">
+        <div class="caption"> Mountain drawing </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/mountain_drawing_edit_1.png" alt="Original cameraman image">
+        <div class="caption"> Mountain edit i=1 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/mountain_drawing_edit_2.png" alt="Cameraman D_x">
+        <div class="caption"> Mountain edit i=3 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/mountain_drawing_edit_3.png" alt="Original cameraman image">
+        <div class="caption"> Mountain edit i=5 </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/mountain_drawing_edit_4.png" alt="Original cameraman image">
+        <div class="caption"> Mountain edit i=7 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/mountain_drawing_edit_5.png" alt="Cameraman D_x">
+        <div class="caption"> Mountain edit i=10 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/mountain_drawing_edit_6.png" alt="Original cameraman image">
+        <div class="caption"> Mountain edit i=20 </div>
+    </div>
+</div>
+<h2> 1.7.2 Inpainting </h2>
+<p> 
+    Using a similar procedure, we're able to replace only a section of an image, 
+    thereby impainting that section. On the example image, we obtain these results:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/original_campanille_.png" alt="Original cameraman image">
+        <div class="caption"> Original Campanille </div>
+    </div>
+    <div class="image-container">
+        <img src="images/campanille_mask.png" alt="Original cameraman image">
+        <div class="caption"> Campanille Mask </div>
+    </div>
+    <div class="image-container">
+        <img src="images/original_campanille_.png" alt="Original cameraman image">
+        <div class="caption"> Inpainted Campanille </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
