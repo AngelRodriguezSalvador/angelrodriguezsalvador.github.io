@@ -589,7 +589,7 @@
         <div class="caption"> Campanille Mask </div>
     </div>
     <div class="image-container">
-        <img src="images/original_campanille_.png" alt="Original cameraman image">
+        <img src="images/inpainted_campanille.png" alt="Original cameraman image">
         <div class="caption"> Inpainted Campanille </div>
     </div>
 </div>
@@ -638,18 +638,240 @@
         <div class="caption"> Campanille to rocket, for varying i values </div>
     </div>
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
+<p>
+    Then I converted Arnold Schwarzenegger to a skull (i=7 is particlarly good):
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/arnold_resized.jpeg" alt="Original cameraman image">
+        <div class="caption"> Arnold original portrait </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/arnold_skull.png" alt="Original cameraman image">
+        <div class="caption"> Arnold to skull </div>
+    </div>
+</div>
+<p> And here is Biden wearing a hat: </p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/biden_resized.jpeg" alt="Original cameraman image">
+        <div class="caption"> Biden original portrait </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/biden_hat.png" alt="Original cameraman image">
+        <div class="caption"> Biden to man with hat </div>
+    </div>
+</div>
+<h2> 1.8 Visual Anagram </h2>
+<p>
+    Let's try something else! In this section, we will try to create an image
+    which matches one prompt when facing upwards, and another when flipped. To 
+    achieve this, in each denoising iteration, we flip the image and calculate the 
+    denoising for each prompt. Then we average this estimated noise. 
+</p>
+<p>
+    Here is a Visual Anagram which is an oil painting of an old man facing upwards, 
+    and a campfire scene facing down.
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/old_man_anagram.png" alt="Original cameraman image">
+        <div class="caption"> Old Man </div>
+    </div>
+    <div class="image-container">
+        <img src="images/campfire_anagram.png" alt="Original cameraman image">
+        <div class="caption"> Campfire </div>
+    </div>
+</div>
+<p>
+    Here are some other examples:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/skull_anagram.png" alt="Original cameraman image">
+        <div class="caption"> Skull facing up </div>
+    </div>
+    <div class="image-container">
+        <img src="images/barista_anagram.png" alt="Original cameraman image">
+        <div class="caption"> Barista facing down </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/man_hat_anagram.png" alt="Original cameraman image">
+        <div class="caption"> Man wearing a hat facing up </div>
+    </div>
+    <div class="image-container">
+        <img src="images/dog_anagram.png" alt="Original cameraman image">
+        <div class="caption"> Dog facing down </div>
+    </div>
+</div>
+<h2> 1.9 Hybrid Images </h2>
+<p> 
+    Similar to the last section, we can also create hybrid images. In this case,
+    instead of combining images by flipping them before calculating noise, 
+    we calculate both in the same direction but apply a high pass filter to one, 
+    and a low pass to another. Here is an anagram between a skull and waterfalls:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/skull_waterfall.png" alt="Original cameraman image">
+        <div class="caption"> Hybrid between skull and waterfall </div>
+    </div>
+</div>
+<p> 
+    Here's another 2 I made, hybrids between a rocket and a dog and a pencil and a barista:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/rocket_dog.png" alt="Original cameraman image">
+        <div class="caption"> Hybrid between skull and waterfall </div>
+    </div>
+    <div class="image-container">
+        <img src="images/pencil_barista.png" alt="Original cameraman image">
+        <div class="caption"> Hybrid between pencil and barista </div>
+    </div>
+</div>
+<h1> Part 2: Diffusion Models from Scratch </h1>
+<h2> Training a Single-Step Denoiser </h2>
+<p>
+    In part B of the project, we implement UNET. To do this, we must implement a series of 
+    transformations, such as ConvBlocks, DownBlocks and UpBlocks. The goal of this part is to 
+    imitate this model and train it to denoise unconditionally: 
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/Unconditional Unet diagram.png" alt="Original cameraman image">
+        <div class="caption"> Unconditional Unet Diagram </div>
+    </div>
+</div>
+<h3> 1.2 Training the UNET </h3>
+<p> 
+    First, we implement the noising algorithm. This is similar to that we found in part A of the 
+    project. These are the associated results:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/digit_noiser.png" alt="Original cameraman image">
+        <div class="caption"> Varying levels of noise </div>
+    </div>
+</div>
+<p>
+    Using these noisy digits as input data, we train our model. Here is the Training
+    loss diagram:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/training_loss.png" alt="Original cameraman image">
+        <div class="caption"> Training loss </div>
+    </div>
+</div>
+<p>
+    Here are some sample results for the first and fifth epoch:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/epoch_1_part_1.png" alt="Original cameraman image">
+        <div class="caption"> First epoch results </div>
+    </div>
+    <div class="image-container">
+        <img src="images/epoch5_part1.png" alt="Original cameraman image">
+        <div class="caption"> Fifth epoch results </div>
+    </div>
+</div>
+<h2> Out of sample testing </h2>
+<p>
+    After we finish our training, we may test out of sample. Here are my results:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/out_of_sample_part1.png" alt="Original cameraman image">
+        <div class="caption"> First epoch results </div>
+    </div>
+</div>
+<h2> Part 2: Training a Diffusion Model </h2>
+<p> 
+    In part 2, we extend the model of part 1, first by creating a time dependent model,
+    and then by making it class-conditioned
+</p>
+<h3> 2.1 Time conditioning </h3>
+<p>
+    In order to create a diffusion model, we must update our part 1 model to denoise 
+    iteratively as opposed to in one step. To adapt our previous model to this iterative
+    process, we adapt our noise generation to be iterative (as defined in part A), and
+    condition the model on T by adding two fully connected (FC) blocks. Here is the  
+    diagram for the conditioned model:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/conditional_model_diagram.png" alt="Original cameraman image">
+        <div class="caption"> Time conditional UNET diagram </div>
+    </div>
+</div>
+<h3> 2.2 Training the UNET </h3>
+<p> 
+    After training the model from the previous part, I got the following loss curve:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/time_conditioned_loss.png" alt="Original cameraman image">
+        <div class="caption"> Time conditioned UNET log loss </div>
+    </div>
+</div>
+<h3> 2.3 Sampling from the UNET </h3>
+<p>
+    Here are the sampling results after 1, 5, and 20 epochs:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/time_conditioned_1.png" alt="Original cameraman image">
+        <div class="caption"> Samples after 1 epoch </div>
+    </div>
+    <div class="image-container">
+        <img src="images/time_conditioned_5.png" alt="Original cameraman image">
+        <div class="caption"> Samples after 5 epochs </div>
+    </div>
+    <div class="image-container">
+        <img src="images/time_conditioned_20.png" alt="Original cameraman image">
+        <div class="caption"> Samples after 20 epochs </div>
+    </div>
+</div>
+<h3> 2.4 Adding class conditioning to the unit </h3>
+<p> 
+    The final improvement for our model is to add class conditioning. This is not 
+    only the essence of what has made diffusion models so popular but should also 
+    significantly improve our results. 
+</p>
+<p> To implement this, we add two new FC Blocks to our model. We also implement drouput
+    to ensure that the model works without conditioning (that is, how larger real models 
+    work).  
+</p>
+<p> Here is the log loss curve for the class conditioned model. </p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/class_conditioned_loss.png" alt="Original cameraman image">
+        <div class="caption"> Class conditioned UNET log loss </div>
+    </div>
+</div>
+<h3> 2.5 Sampling from class-conditioned model </h3>
+<p> Here are the sampling results for the class conditioned model: </p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/class_conditioned_1.png" alt="Original cameraman image">
+        <div class="caption"> Class conditioned samples after 1 epoch </div>
+    </div>
+    <div class="image-container">
+        <img src="images/class_conditioned_5.png" alt="Original cameraman image">
+        <div class="caption"> Class conditioned samples after 5 epochs </div>
+    </div>
+    <div class="image-container">
+        <img src="images/class_conditioned_20.png" alt="Original cameraman image">
+        <div class="caption"> Class conditioned samples after 20 epochs </div>
+    </div>
+</div>
 </body>
 </html>
