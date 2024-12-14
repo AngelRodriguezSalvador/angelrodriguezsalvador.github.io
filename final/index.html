@@ -1,0 +1,339 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Project 5 </title>
+    <script type="text/javascript" async 
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+    <style>
+        .image-row {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 20px;
+        }
+        .image-container {
+            text-align: center;
+            margin: 20px;
+            width: 25%;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        .caption {
+            font-size: 18px;
+            color: #555;
+            margin-top: 10px;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        .gallery img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+        .image-row:last-of-type .image-container {
+        width: 85%;
+    }
+    </style>
+</head>
+<body>
+<h1> Neural Radiance Fields </h1>
+<h2> Part 1: Fit a Neural Field to a 2D image </h2>
+<h3> Network </h3>
+<p>
+    First, we create a multilayer perceptron network with sinusoidal 
+    positional encoding. This network will take in the 2d pixel coordinates
+    and will output the 3D pixel colors. 
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/mlp_img.jpg" alt="Original cameraman image">
+        <div class="caption"> MLP model architecture </div>
+    </div>
+</div>
+<h3> Dataloader </h3>
+<p>
+    The next step is to implment a Dataloader that randomly samples pixels
+    from the image at each iteration. This is done because selecting all the pixels
+    from a high resolution image would exceed the GPU memory limit.
+</p>
+<h3> Loss function, Optimizer and Metric </h3>
+<p> 
+    As suggested, I used MSE error as the loss function of the difference between
+    predicted pixel value and true color. Using this, I trained my networks using
+    Adam for 2000 iterations. 
+</p>
+<h3> Hyperparameter Tuning </h3>
+<p> The next step is hyperparameter tuning. I chose to explore the impact of 
+    varying learning rate and L. Here are my results: 
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/lrhypertuning.png" alt="Original cameraman image">
+        <div class="caption"> Learning Rate Tuning </div>
+    </div>
+    <div class="image-container">
+        <img src="images/lhypertuning.png" alt="Original cameraman image">
+        <div class="caption"> L tuning </div>
+    </div>
+</div>
+<p> 
+    As can be seen from the graph, the optimal learning rate out of those I tested 
+    was 5e-3. Also, we can see that larger Ls lead to better results over 2000 iterations.
+    However, there isn't much difference when L surpasses 10. For that reason, 
+    I used 5e-3, but kept the recommended L=10. 
+</p>
+<h3> Results </h3>
+<p>
+    The first image I used it this photo of a fox:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/nerfphoto.jpg" alt="Original cameraman image">
+        <div class="caption"> Fox Original Image </div>
+    </div>
+</div>
+<p> With the selected parameters, I obtained the following results: </p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/fox1.png" alt="Original cameraman image">
+        <div class="caption"> Fox Iteration 1 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/fox2.png" alt="Original cameraman image">
+        <div class="caption"> Fox Iteration 25 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/fox3.png" alt="Original cameraman image">
+        <div class="caption"> Fox Iteration 100 </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/fox4.png" alt="Original cameraman image">
+        <div class="caption"> Fox Iteration 500 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/fox5.png" alt="Original cameraman image">
+        <div class="caption"> Fox Iteration 1000 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/fox6.png" alt="Original cameraman image">
+        <div class="caption"> Fox Iteration 2000 (Final) </div>
+    </div>
+</div>
+<p> 
+    Then, I repeated the process with the 'Las Meninas' painting. 
+    I chose this because there isn't a single subject in the middle
+    but rather multiple characters. Like with the fox image, the first 
+    step was hyperparameter tuning:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/meninaslr.png" alt="Original cameraman image">
+        <div class="caption"> Learning Rate Tuning </div>
+    </div>
+    <div class="image-container">
+        <img src="images/meninasl.png" alt="Original cameraman image">
+        <div class="caption"> L tuning </div>
+    </div>
+</div>
+<p> 
+    Interestingly, in this painting (and over 2000 iterations), there was
+    no perceptible difference between learning rates, so long as they were lower
+    than 2e-2. I chose the highest learning rate out of the ties since it had better 
+    results at earlier iterations. As for L tuning, there was no perceptible difference
+    for L above 10. Here are my resulting images at various iterations:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/meninas1.png" alt="Original cameraman image">
+        <div class="caption"> Meninas Iteration 1 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/meninas2.png" alt="Original cameraman image">
+        <div class="caption"> Meninas Iteration 25 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/meninas3.png" alt="Original cameraman image">
+        <div class="caption"> Meninas Iteration 100 </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/meninas4.png" alt="Original cameraman image">
+        <div class="caption"> Meninas Iteration 500 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/meninas5.png" alt="Original cameraman image">
+        <div class="caption"> Meninas Iteration 1000 </div>
+    </div>
+    <div class="image-container">
+        <img src="images/meninas6.png" alt="Original cameraman image">
+        <div class="caption"> Meninas Iteration 2000 (Final) </div>
+    </div>
+</div>
+</body>
+<h2> Part 2: Fit a Neural Field to a 2D image </h2>
+<p> 
+    In the second part of the project, I use a Neural Radiance Field to 
+    represent 3D space. Compared to the original NERF paper, we will user lower
+    resolution images and preprocessed cameras. Still our overall procedure is similar. 
+</p>
+<h3> 2.1 Create Rays From Cameras </h3>
+<p> 
+    This formula relates camera coordinates to world coordinates:
+</p>
+<p>
+    \[
+        \begin{bmatrix}
+        x_c \\ 
+        y_c \\ 
+        z_c \\ 
+        1
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+        \mathbf{R}_{3 \times 3} & \mathbf{t} \\
+        \mathbf{0}_{1 \times 3} & 1
+        \end{bmatrix}
+        \begin{bmatrix}
+        x_w \\ 
+        y_w \\ 
+        z_w \\ 
+        1
+        \end{bmatrix}
+    \]
+</p>
+<p> 
+    The matrix to the right of the equals sign is the extrinsic (w2c) matrix.
+    This relates the world coordinates to the camera coordinates. Next we relate
+    the camera coordinates to the pixel coordinates using the following equations:
+</p>
+<p>
+
+    Pixel to Camera:
+    \[
+    s
+    \begin{bmatrix}
+    u \\ 
+    v \\ 
+    1
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+    f_x & 0 & o_x \\
+    0 & f_y & o_y \\
+    0 & 0 & 1
+    \end{bmatrix}
+    \begin{bmatrix}
+    x_c \\ 
+    y_c \\ 
+    z_c
+    \end{bmatrix}
+    \]
+</p>
+<p>
+    With these two conversions, we only need to define a pixel to ray conversion, 
+    to obtain ray origin and direction. 
+</p>
+<h3> 2.2 Sampling </h3>
+<p> 
+    Using the ray creation that I implemented for part 2.1, we may now implement sampling.
+    The task becomes harder than it was for the 2D Case. Now, we must first sample rays from
+    images and then sample points from rays.
+</p>
+<h3> 2.3 Putting the dataloading all together </h3>
+<p>
+    We may use the provided visualization to check that the code is so far correct. 
+    Here are the results I obtained:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/render.png" alt="Original cameraman image">
+        <div class="caption"> Viser Dataloading visualization </div>
+    </div>
+    <div class="image-container">
+        <img src="images/render_one_rays.png" alt="Original cameraman image">
+        <div class="caption"> Viser all rays from same image </div>
+    </div>
+</div>
+<h3> 2.4 Neural Radiance Field </h3>
+<p> 
+    Here is the structure of a Neural Radiance Field:
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/nerf_mlp.png" alt="Original cameraman image">
+        <div class="caption"> Viser Dataloading visualization </div>
+    </div>
+</div>
+<p> 
+    As part of this section, I implemented the network shown. Compared to the network
+    that I used in part A, the first observation that one can make is that the net is
+    significantly deeper. This can be easily explained by the fact that 3D is way more 
+    challenging than 2D. It also stands out that we use an adapted version of a positional encoding,
+    that now encapsulates both coordinates and ray direction. 
+</p>
+<h3> 2.5 Volumetric Rendering </h3>
+<p> \[ \hat{C}(\mathbf{r}) = \sum_{i=1}^{N} T_i \left(1 - \exp(-\sigma_i \delta_i)\right) \mathbf{c}_i, \quad \text{where} \quad T_i = \exp\left(-\sum_{j=1}^{i-1} \sigma_j \delta_j\right) \]
+</p>
+<p> With this defined, we're ready to train the model and evaluate our results. Here is the validation accuracy of the model:</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/training_plot (2).png" alt="Original cameraman image">
+        <div class="caption"> Training loss and PSNR </div>
+    </div>
+</div>
+<p> 
+    Instead of comparing results for 6 still images, I decided that it looked better to 
+    create the video visualization for intermediate models too (in effect comparing 60 frames).
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/150gif.gif" alt="Original cameraman image">
+        <div class="caption"> Rendered results after 150 steps </div>
+    </div>
+    <div class="image-container">
+        <img src="images/500gif.gif" alt="Original cameraman image">
+        <div class="caption"> Rendered results after 500 steps </div>
+    </div>
+</div>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/1000gif.gif" alt="Original cameraman image">
+        <div class="caption"> Rendered results after 1000 steps </div>
+    </div>
+    <div class="image-container">
+        <img src="images/finalgif.gif" alt="Original cameraman image">
+        <div class="caption"> Rendered results after 2000 steps </div>
+    </div>
+</div>
+<h2> Bells & Whistles </h2>
+<h3> Changing background color </h3>
+<p>
+    For the bells and whistles portion, I decided to change the background
+    color. This can be done with the same trained version of the model.
+    This is possible because we trained our model to identify rays where there
+    is no object. At these points, we should inject backgound color. Therefore, 
+    by adding the product of accumulated transmittance and our desired RGB background
+    we can create a non-black setting for our Lego. Here are a grey and red background: 
+</p>
+<div class="image-row">
+    <div class="image-container">
+        <img src="images/redgif.gif" alt="Original cameraman image">
+        <div class="caption"> Rendered results after 1000 steps </div>
+    </div>
+    <div class="image-container">
+        <img src="images/gray_gif.gif" alt="Original cameraman image">
+        <div class="caption"> Rendered results after 2000 steps </div>
+    </div>
+</div>
+</html>
